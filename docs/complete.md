@@ -36,3 +36,33 @@ Tasks moved here once done.
 - Run with `uv run python -m stotify.main [alerts.json]`
 - `skip_market_check` flag available for testing outside market hours
 - NTFY_PREFIX env var configures channel prefix (default: "stotify")
+
+---
+
+## Makefile ✓
+
+- [x] `make test` - run pytest
+- [x] `make format` - format + fix with ruff
+- [x] `make check` - lint without modifying
+
+### Notes
+
+- Added ruff to dev dependencies
+
+---
+
+## Task 4 - GitHub Actions ✓
+
+- [x] Created workflow directory (.github/workflows)
+- [x] Created check_stocks.yml workflow
+- [x] Configured cron schedule (every 15 min, Mon-Fri, 1-9 PM UTC)
+- [x] Set up UV with caching
+- [x] Committed workflow to repo
+
+### Notes
+
+- Runs every 15 min during market hours (9:30 AM - 4 PM ET)
+- Uses astral-sh/setup-uv@v7 for fast dependency installation
+- NTFY_PREFIX configurable via repository variable
+- Manual trigger available via workflow_dispatch
+- No remote configured - run `git remote add origin <url>` then `git push` to enable
