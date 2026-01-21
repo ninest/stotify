@@ -1,6 +1,6 @@
 {
   "alerts": [
-    { "ticker": "AAPL", "high": 250, "low": 180 },
-    { "ticker": "GOOGL", "high": 200 }
+    { "ticker": "AAPL", "high": 248, "low": 246 },
+    { "ticker": "GOOGL", "high": 323, "low": 321 }
   ]
 }
