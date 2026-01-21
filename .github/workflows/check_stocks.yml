@@ -1,0 +1,31 @@
+name: Check Stock Alerts
+
+on:
+  schedule:
+    # Every 15 min, 1-9 PM UTC (covers 9 AM-4 PM ET w/ DST buffer)
+    - cron: '*/15 13-21 * * 1-5'
+  workflow_dispatch:  # Manual trigger
+
+jobs:
+  check-stocks:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+
+      - name: Set up Python
+        run: uv python install 3.14
+
+      - name: Install dependencies
+        run: uv sync
+
+      - name: Run stock alerts
+        run: uv run python -m stotify.main alerts.json
+        env:
+          NTFY_PREFIX: ${{ vars.NTFY_PREFIX || 'stotify' }}
