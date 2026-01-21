@@ -2,11 +2,7 @@
 
 ## Overview
 
-Stotify is a stock price alert system that monitors configured stock tickers and sends push notifications via ntfy.sh when prices cross specified thresholds.
-
-## Problem Statement
-
-Investors want to be notified when stocks hit certain price points without constantly monitoring the market. Stotify provides automated price threshold monitoring with push notifications.
+Stock price alert system that monitors configured tickers and sends ntfy.sh notifications when prices cross thresholds.
 
 ## Technical Stack
 
@@ -15,177 +11,94 @@ Investors want to be notified when stocks hit certain price points without const
 - **Stock Data**: Yahoo Finance (yfinance)
 - **Notifications**: ntfy.sh
 - **Scheduling**: GitHub Actions (cron every 15 minutes)
+- **Testing**: pytest
 
-## Core Features
+## Specifications
 
-### 1. Stock Price Monitoring
-
-- Fetch current stock prices from Yahoo Finance
-- Support multiple stock tickers
-- Check prices against configured thresholds (high/low)
-- A single ticker can have both high and low alerts
-
-### 2. Threshold Alerts
-
+### Threshold Alerts
 - **High alert**: Triggered when current price >= threshold
 - **Low alert**: Triggered when current price <= threshold
-- Alerts continue to fire every 15 minutes while condition remains true
+- Alerts fire every 15 minutes while condition remains true
 
-### 3. Notifications via ntfy.sh
+### ntfy.sh Channels
+- Auto-generated per alert: `{prefix}-{ticker}-{H|L}{threshold}`
+- Examples: `stotify-AAPL-H250`, `stotify-AAPL-L180`
+- Prefix configurable via `NTFY_PREFIX` env var (default: "stotify")
 
-- Send push notifications to granular ntfy.sh channels
-- Each alert has its own channel, auto-generated from the alert config
-- Channel naming format: `{prefix}-{ticker}-{H|L}{threshold}`
-  - Example: `stotify-AAPL-H250` (Apple high alert at $250)
-  - Example: `stotify-AAPL-L180` (Apple low alert at $180)
-- Users can subscribe to specific alerts or multiple channels
-- Notification content includes:
-  - Stock ticker symbol
-  - Current price
-  - Threshold that was triggered (high/low and value)
+### Trading Hours
+- 9:30 AM - 4:00 PM Eastern Time
+- Monday through Friday
+- Does not account for market holidays
 
-### 4. Trading Hours Check
-
-- Only run checks during US stock market hours
-- Market hours: 9:30 AM - 4:00 PM Eastern Time
-- Monday through Friday (exclude weekends)
-- Note: Does not account for market holidays
-
-## Configuration
-
-### Stock Alerts JSON (`alerts.json`)
-
+### Configuration (`alerts.json`)
 ```json
 {
   "alerts": [
-    {
-      "ticker": "AAPL",
-      "high": 250,
-      "low": 180
-    },
-    {
-      "ticker": "GOOGL",
-      "high": 200
-    },
-    {
-      "ticker": "MSFT",
-      "low": 400
-    }
+    { "ticker": "AAPL", "high": 250, "low": 180 },
+    { "ticker": "GOOGL", "high": 200 }
   ]
 }
 ```
 
-- `ticker`: Stock symbol (required)
-- `high`: Price threshold for high alert (optional)
-- `low`: Price threshold for low alert (optional)
-- At least one of `high` or `low` must be specified
-
-### ntfy.sh Channel Configuration
-
-- Channels are auto-generated per alert using the format: `{prefix}-{ticker}-{H|L}{threshold}`
-- Prefix is configurable via `NTFY_PREFIX` environment variable (defaults to "stotify")
-- Examples with default prefix:
-  - `stotify-AAPL-H250` - High alert for AAPL at $250
-  - `stotify-AAPL-L180` - Low alert for AAPL at $180
-  - `stotify-GOOGL-H200` - High alert for GOOGL at $200
-- Users subscribe to specific channels on their devices to receive alerts
-- This allows granular control - follow one alert, one ticker, or all alerts
+### Error Handling
+- Yahoo Finance errors: silently skip ticker
+- ntfy.sh errors: log and continue
+- Invalid config: exit with error
 
 ## Project Structure
 
 ```
 stotify/
 ├── docs/
-│   └── PRD.md
+│   ├── PRD.md
+│   ├── complete.md
+│   └── future.md
 ├── stotify/
 │   ├── __init__.py
-│   ├── main.py           # CLI entry point
-│   ├── stock.py          # Stock price fetching (Yahoo Finance)
-│   ├── notifier.py       # ntfy.sh notification sending
-│   └── market_hours.py   # Trading hours validation
-├── alerts.json           # Stock alert configuration
-├── .github/
-│   └── workflows/
-│       └── check_stocks.yml  # GitHub Actions cron workflow
+│   ├── main.py
+│   ├── stock.py
+│   ├── notifier.py
+│   └── market_hours.py
+├── tests/
+│   ├── __init__.py
+│   ├── test_stock.py
+│   ├── test_notifier.py
+│   ├── test_market_hours.py
+│   └── test_main.py
+├── alerts.json
+├── .github/workflows/check_stocks.yml
 ├── pyproject.toml
-└── README.md
+├── AGENTS.md
+└── CLAUDE.md
 ```
 
-## Module Responsibilities
+---
 
-### `main.py`
-- CLI entry point
-- Orchestrates the check flow:
-  1. Verify market is open
-  2. Load alert configuration
-  3. For each alert, fetch price and check thresholds
-  4. Send notifications for triggered alerts
+## Tasks
 
-### `stock.py`
-- Fetch current stock price using yfinance
-- Handle API errors gracefully (silent skip on failure)
+### 1. Project Setup
+- [ ] 1.1 Initialize UV project with pyproject.toml
+- [ ] 1.2 Add dependencies (yfinance, requests, pytz, pytest)
+- [ ] 1.3 Create project structure (stotify/, tests/)
+- [ ] 1.4 Create sample alerts.json
 
-### `notifier.py`
-- Generate channel name from alert config: `{prefix}-{ticker}-{H|L}{threshold}`
-- Send notifications to the appropriate ntfy.sh channel
-- Format notification message with ticker, price, and threshold
+### 2. Core Modules
+- [ ] 2.1 Implement `market_hours.py` - trading hours check
+- [ ] 2.2 Implement `stock.py` - fetch price from Yahoo Finance
+- [ ] 2.3 Implement `notifier.py` - send to ntfy.sh with channel generation
+- [ ] 2.4 Implement `main.py` - CLI orchestration
 
-### `market_hours.py`
-- Check if current time is within US market hours
-- Eastern Time: 9:30 AM - 4:00 PM, Monday-Friday
+### 3. Testing
+- [ ] 3.1 Write tests for `market_hours.py`
+- [ ] 3.2 Write tests for `stock.py` (mock yfinance)
+- [ ] 3.3 Write tests for `notifier.py` (mock requests)
+- [ ] 3.4 Write tests for `main.py` (integration)
+- [ ] 3.5 Ensure good test coverage
 
-## GitHub Actions Workflow
+### 4. GitHub Actions
+- [ ] 4.1 Create workflow file for cron job
+- [ ] 4.2 Add manual trigger for testing
+- [ ] 4.3 Configure UV setup in workflow
 
-```yaml
-name: Check Stock Prices
-
-on:
-  schedule:
-    - cron: '*/15 * * * *'  # Every 15 minutes
-  workflow_dispatch:         # Manual trigger for testing
-
-jobs:
-  check:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Install UV
-        uses: astral-sh/setup-uv@v4
-      - name: Run stock checker
-        env:
-          NTFY_PREFIX: ${{ vars.NTFY_PREFIX }}  # Optional, defaults to "stotify"
-        run: uv run python -m stotify.main
-```
-
-## Error Handling
-
-- **Yahoo Finance errors**: Silently skip the affected ticker, continue with others
-- **ntfy.sh errors**: Log error, continue with other notifications
-- **Invalid config**: Exit with error message
-
-## Environment Variables
-
-| Variable | Description | Required | Default |
-|----------|-------------|----------|---------|
-| `NTFY_PREFIX` | Prefix for ntfy.sh channel names | No | `stotify` |
-
-## Dependencies
-
-- `yfinance` - Yahoo Finance API wrapper
-- `requests` - HTTP client for ntfy.sh
-- `pytz` - Timezone handling for market hours
-
-## Out of Scope
-
-- Market holiday detection
-- Historical price tracking
-- Web UI for configuration
-- User authentication
-- Alert state persistence (to prevent repeat notifications)
-
-## Future Considerations
-
-- Add market holiday calendar
-- Support for other notification services (Slack, Discord, email)
-- Percentage-based thresholds (e.g., "notify if drops 5%")
-- Cooldown period to reduce notification frequency
+### 5. Documentation
+- [ ] 5.1 Write README.md with setup instructions
