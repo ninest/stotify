@@ -1,8 +1,6 @@
 """Tests for main module."""
 
 import json
-import tempfile
-from pathlib import Path
 from unittest.mock import patch
 
 import pytest
@@ -14,9 +12,9 @@ class TestLoadConfig:
     def test_valid_config(self, tmp_path):
         """Should load valid config."""
         config_file = tmp_path / "alerts.json"
-        config_file.write_text(json.dumps({
-            "alerts": [{"ticker": "AAPL", "high": 250}]
-        }))
+        config_file.write_text(
+            json.dumps({"alerts": [{"ticker": "AAPL", "high": 250}]})
+        )
 
         config = load_config(config_file)
         assert len(config["alerts"]) == 1
@@ -32,9 +30,7 @@ class TestLoadConfig:
     def test_missing_ticker(self, tmp_path):
         """Should raise if alert missing ticker."""
         config_file = tmp_path / "alerts.json"
-        config_file.write_text(json.dumps({
-            "alerts": [{"high": 250}]
-        }))
+        config_file.write_text(json.dumps({"alerts": [{"high": 250}]}))
 
         with pytest.raises(ValueError, match="must have 'ticker'"):
             load_config(config_file)
@@ -42,9 +38,7 @@ class TestLoadConfig:
     def test_missing_threshold(self, tmp_path):
         """Should raise if alert has no high or low."""
         config_file = tmp_path / "alerts.json"
-        config_file.write_text(json.dumps({
-            "alerts": [{"ticker": "AAPL"}]
-        }))
+        config_file.write_text(json.dumps({"alerts": [{"ticker": "AAPL"}]}))
 
         with pytest.raises(ValueError, match="must have 'high' or 'low'"):
             load_config(config_file)
@@ -64,9 +58,11 @@ class TestCheckAlerts:
         """Should send alert when price >= high threshold."""
         config = {"alerts": [{"ticker": "AAPL", "high": 250}]}
 
-        with patch("stotify.main.is_market_open", return_value=True), \
-             patch("stotify.main.get_price", return_value=260.0), \
-             patch("stotify.main.send_alert", return_value=True) as mock_send:
+        with (
+            patch("stotify.main.is_market_open", return_value=True),
+            patch("stotify.main.get_price", return_value=260.0),
+            patch("stotify.main.send_alert", return_value=True) as mock_send,
+        ):
             sent = check_alerts(config)
 
         assert sent == 1
@@ -76,9 +72,11 @@ class TestCheckAlerts:
         """Should send alert when price <= low threshold."""
         config = {"alerts": [{"ticker": "AAPL", "low": 180}]}
 
-        with patch("stotify.main.is_market_open", return_value=True), \
-             patch("stotify.main.get_price", return_value=175.0), \
-             patch("stotify.main.send_alert", return_value=True) as mock_send:
+        with (
+            patch("stotify.main.is_market_open", return_value=True),
+            patch("stotify.main.get_price", return_value=175.0),
+            patch("stotify.main.send_alert", return_value=True) as mock_send,
+        ):
             sent = check_alerts(config)
 
         assert sent == 1
@@ -88,9 +86,11 @@ class TestCheckAlerts:
         """Should not send alert when price is between thresholds."""
         config = {"alerts": [{"ticker": "AAPL", "high": 250, "low": 180}]}
 
-        with patch("stotify.main.is_market_open", return_value=True), \
-             patch("stotify.main.get_price", return_value=200.0), \
-             patch("stotify.main.send_alert") as mock_send:
+        with (
+            patch("stotify.main.is_market_open", return_value=True),
+            patch("stotify.main.get_price", return_value=200.0),
+            patch("stotify.main.send_alert") as mock_send,
+        ):
             sent = check_alerts(config)
 
         assert sent == 0
@@ -100,9 +100,11 @@ class TestCheckAlerts:
         """Should skip ticker if get_price returns None."""
         config = {"alerts": [{"ticker": "INVALID", "high": 100}]}
 
-        with patch("stotify.main.is_market_open", return_value=True), \
-             patch("stotify.main.get_price", return_value=None), \
-             patch("stotify.main.send_alert") as mock_send:
+        with (
+            patch("stotify.main.is_market_open", return_value=True),
+            patch("stotify.main.get_price", return_value=None),
+            patch("stotify.main.send_alert") as mock_send,
+        ):
             sent = check_alerts(config)
 
         assert sent == 0
@@ -112,9 +114,11 @@ class TestCheckAlerts:
         """skip_market_check should bypass market hours check."""
         config = {"alerts": [{"ticker": "AAPL", "high": 250}]}
 
-        with patch("stotify.main.is_market_open", return_value=False), \
-             patch("stotify.main.get_price", return_value=260.0), \
-             patch("stotify.main.send_alert", return_value=True):
+        with (
+            patch("stotify.main.is_market_open", return_value=False),
+            patch("stotify.main.get_price", return_value=260.0),
+            patch("stotify.main.send_alert", return_value=True),
+        ):
             sent = check_alerts(config, skip_market_check=True)
 
         assert sent == 1
@@ -124,9 +128,9 @@ class TestMain:
     def test_main_success(self, tmp_path):
         """Should return 0 on success."""
         config_file = tmp_path / "alerts.json"
-        config_file.write_text(json.dumps({
-            "alerts": [{"ticker": "AAPL", "high": 250}]
-        }))
+        config_file.write_text(
+            json.dumps({"alerts": [{"ticker": "AAPL", "high": 250}]})
+        )
 
         with patch("stotify.main.check_alerts", return_value=1):
             result = main(str(config_file))

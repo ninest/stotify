@@ -2,7 +2,6 @@
 
 from unittest.mock import Mock, patch
 
-import pytest
 
 from stotify.notifier import get_channel, send_alert
 
@@ -42,7 +41,9 @@ class TestSendAlert:
         mock_response = Mock()
         mock_response.raise_for_status = Mock()
 
-        with patch("stotify.notifier.requests.post", return_value=mock_response) as mock_post:
+        with patch(
+            "stotify.notifier.requests.post", return_value=mock_response
+        ) as mock_post:
             result = send_alert("AAPL", 255.50, "high", 250)
 
         assert result is True
@@ -56,7 +57,9 @@ class TestSendAlert:
         mock_response = Mock()
         mock_response.raise_for_status = Mock()
 
-        with patch("stotify.notifier.requests.post", return_value=mock_response) as mock_post:
+        with patch(
+            "stotify.notifier.requests.post", return_value=mock_response
+        ) as mock_post:
             send_alert("AAPL", 175.00, "low", 180)
 
         call_args = mock_post.call_args
@@ -64,7 +67,9 @@ class TestSendAlert:
 
     def test_send_alert_failure(self):
         """Should return False and log on error."""
-        with patch("stotify.notifier.requests.post", side_effect=Exception("Network error")):
+        with patch(
+            "stotify.notifier.requests.post", side_effect=Exception("Network error")
+        ):
             with patch("stotify.notifier.logger.error") as mock_log:
                 result = send_alert("AAPL", 255.50, "high", 250)
 

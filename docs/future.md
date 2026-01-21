@@ -4,10 +4,6 @@ Random ideas/tasks to pick up whenever.
 
 ---
 
-Wants:
-
-- makefile with format and test command
-
 ---
 
 Far future: 

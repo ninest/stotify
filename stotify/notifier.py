@@ -11,13 +11,17 @@ DEFAULT_PREFIX = "stotify"
 logger = logging.getLogger(__name__)
 
 
-def get_channel(ticker: str, alert_type: str, threshold: float, prefix: str | None = None) -> str:
+def get_channel(
+    ticker: str, alert_type: str, threshold: float, prefix: str | None = None
+) -> str:
     """Generate ntfy channel name. Format: {prefix}-{ticker}-{H|L}{threshold}"""
     if prefix is None:
         prefix = os.environ.get("NTFY_PREFIX", DEFAULT_PREFIX)
     type_char = "H" if alert_type == "high" else "L"
     # Remove decimal if whole number
-    threshold_str = str(int(threshold)) if threshold == int(threshold) else str(threshold)
+    threshold_str = (
+        str(int(threshold)) if threshold == int(threshold) else str(threshold)
+    )
     return f"{prefix}-{ticker}-{type_char}{threshold_str}"
 
 
