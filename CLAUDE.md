@@ -6,3 +6,4 @@ Stock price alert system that monitors tickers and sends ntfy.sh notifications w
 
 - Be concise; sacrifice grammar for concision
 - Prefer CLI commands over editing files (e.g., `uv add package` instead of manually editing pyproject.toml)
+- Completed tasks go in `docs/complete.md`

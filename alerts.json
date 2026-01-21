@@ -1,0 +1,6 @@
+{
+  "alerts": [
+    { "ticker": "AAPL", "high": 250, "low": 180 },
+    { "ticker": "GOOGL", "high": 200 }
+  ]
+}
