@@ -25,6 +25,9 @@ jobs:
       - name: Install dependencies
         run: uv sync
 
+      - name: Install package
+        run: uv pip install -e .
+
       - name: Run stock alerts
         run: uv run python -m stotify.main alerts.json
         env:
