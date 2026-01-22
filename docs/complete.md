@@ -66,3 +66,51 @@ Tasks moved here once done.
 - NTFY_PREFIX configurable via repository variable
 - Manual trigger available via workflow_dispatch
 - No remote configured - run `git remote add origin <url>` then `git push` to enable
+
+---
+
+## Task 5 - Custom Notification Groups ✓
+
+- [x] TDD: Wrote comprehensive tests (37 total, all passing)
+- [x] Updated config schema from `alerts` array to `groups` object
+- [x] Added group name validation (a-z, A-Z, 0-9, -, _, max 100 chars)
+- [x] Simplified notifier to use group-based channels
+- [x] Updated all core modules (main.py, notifier.py)
+- [x] Updated scripts/list_topics.py for groups
+- [x] Updated example alerts.json config
+- [x] All 49 tests passing
+
+### Notes
+
+**Breaking change (v2.0):** Config format changed
+
+Old format:
+```json
+{
+  "alerts": [
+    {"ticker": "AAPL", "high": 250, "low": 246}
+  ]
+}
+```
+
+New format:
+```json
+{
+  "groups": {
+    "portfolio": [
+      {"ticker": "AAPL", "high": 250, "low": 246}
+    ]
+  }
+}
+```
+
+**Benefits:**
+- Single ntfy.sh subscription per group instead of per alert-threshold
+- Logical organization of alerts (e.g., "portfolio", "tech-watch")
+- Messages now prefixed with `[group-name]` for easy filtering
+- Channels simplified: `stotify-portfolio` vs `stotify-AAPL-H250`
+
+**Migration:**
+- Wrap existing alerts in a group: `{"groups": {"my-stocks": [...alerts...]}}`
+- Run `scripts/list_topics.py` to see new channel names
+- Update ntfy.sh subscriptions
