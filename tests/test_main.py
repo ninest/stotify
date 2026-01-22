@@ -122,6 +122,48 @@ class TestLoadConfig:
         config = load_config(config_file)
         assert "tech_watch" in config["groups"]
 
+    def test_rejects_empty_group_name(self, tmp_path):
+        """Empty group name should error."""
+        config_file = write_config(
+            tmp_path, {"groups": {"": [{"ticker": "AAPL", "high": 250}]}}
+        )
+        with pytest.raises(ValueError, match="Group name cannot be empty"):
+            load_config(config_file)
+
+    def test_rejects_group_name_exceeding_100_chars(self, tmp_path):
+        """Group names > 100 characters should error."""
+        long_name = "a" * 101
+        config_file = write_config(
+            tmp_path, {"groups": {long_name: [{"ticker": "AAPL", "high": 250}]}}
+        )
+        with pytest.raises(ValueError, match="exceeds 100 characters"):
+            load_config(config_file)
+
+    def test_accepts_group_name_exactly_100_chars(self, tmp_path):
+        """Group names exactly 100 characters should be valid."""
+        exact_name = "a" * 100
+        config_file = write_config(
+            tmp_path, {"groups": {exact_name: [{"ticker": "AAPL", "high": 250}]}}
+        )
+        config = load_config(config_file)
+        assert exact_name in config["groups"]
+
+    def test_group_names_are_case_sensitive(self, tmp_path):
+        """Group names should be case-sensitive."""
+        config_file = write_config(
+            tmp_path,
+            {
+                "groups": {
+                    "Portfolio": [{"ticker": "AAPL", "high": 250}],
+                    "portfolio": [{"ticker": "GOOGL", "high": 300}],
+                }
+            },
+        )
+        config = load_config(config_file)
+        assert "Portfolio" in config["groups"]
+        assert "portfolio" in config["groups"]
+        assert len(config["groups"]) == 2
+
     def test_rejects_missing_ticker_in_group(self, tmp_path):
         """Alerts missing ticker should error with group context."""
         config_file = write_config(
@@ -225,7 +267,7 @@ class TestCheckAlerts:
         config = {
             "groups": {
                 "portfolio": [{"ticker": "AAPL", "high": 250}],
-                "tech-watch": [{"ticker": "GOOGL", "high": 320}],
+                "tech-watch": [{"ticker": "GOOGL", "low": 320}],
             }
         }
 
@@ -236,7 +278,7 @@ class TestCheckAlerts:
         # Check both calls include their group names
         calls = mock_send_alert.call_args_list
         assert calls[0][0] == ("AAPL", 260.0, "high", 250, "portfolio")
-        assert calls[1][0] == ("GOOGL", 260.0, "high", 320, "tech-watch")
+        assert calls[1][0] == ("GOOGL", 260.0, "low", 320, "tech-watch")
 
     def test_multiple_alerts_in_same_group(self, mock_market_open, mock_send_alert):
         """Multiple alerts in same group should all use that group name."""
