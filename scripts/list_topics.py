@@ -14,8 +14,15 @@ def main() -> None:
     with open(ALERTS_FILE) as f:
         data = json.load(f)
 
-    for group_name in data["groups"].keys():
+    for group_name, alerts in data["groups"].items():
         print(get_channel(group_name))
+        for alert in alerts:
+            ticker = alert["ticker"]
+            if "high" in alert:
+                print(f"- {ticker} > {alert['high']}")
+            if "low" in alert:
+                print(f"- {ticker} < {alert['low']}")
+        print()
 
 
 if __name__ == "__main__":
