@@ -1,6 +1,8 @@
 {
-  "alerts": [
-    { "ticker": "AAPL", "high": 248, "low": 246 },
-    { "ticker": "GOOGL", "high": 323, "low": 321 }
-  ]
+  "groups": {
+    "portfolio": [
+      { "ticker": "AAPL", "high": 248, "low": 246 },
+      { "ticker": "GOOGL", "high": 323, "low": 321 }
+    ]
+  }
 }
