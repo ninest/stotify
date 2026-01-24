@@ -1,8 +1,24 @@
 {
   "groups": {
     "portfolio": [
-      { "ticker": "AAPL", "high": 248, "low": 246 },
-      { "ticker": "GOOGL", "high": 323, "low": 321 }
+      {
+        "ticker": "AAPL",
+        "strategy": "threshold",
+        "timeframe": "15m",
+        "params": { "high": 248, "low": 246 }
+      },
+      {
+        "ticker": "GOOGL",
+        "strategy": "threshold",
+        "timeframe": "15m",
+        "params": { "high": 323, "low": 321 }
+      },
+      {
+        "ticker": "AAPL",
+        "strategy": "ma_cross",
+        "timeframe": "1d",
+        "params": { "fast_window": 50, "slow_window": 200 }
+      }
     ]
   }
 }

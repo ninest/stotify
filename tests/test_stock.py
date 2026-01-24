@@ -2,7 +2,9 @@
 
 from unittest.mock import Mock, patch
 
-from stotify.stock import get_price
+import pandas as pd
+
+from stotify.stock import get_history, get_price
 
 
 def test_get_price_from_fast_info():
@@ -46,3 +48,35 @@ def test_get_price_returns_none_on_exception():
         price = get_price("AAPL")
 
     assert price is None
+
+
+def test_get_history_returns_dataframe():
+    """Should return history DataFrame when available."""
+    mock_ticker = Mock()
+    history = pd.DataFrame({"Close": [1.0, 2.0, 3.0]})
+    mock_ticker.history.return_value = history
+
+    with patch("stotify.stock.yf.Ticker", return_value=mock_ticker):
+        result = get_history("AAPL", period="1mo", interval="1d")
+
+    assert result is history
+
+
+def test_get_history_returns_none_on_empty():
+    """Should return None for empty history data."""
+    mock_ticker = Mock()
+    history = pd.DataFrame()
+    mock_ticker.history.return_value = history
+
+    with patch("stotify.stock.yf.Ticker", return_value=mock_ticker):
+        result = get_history("AAPL")
+
+    assert result is None
+
+
+def test_get_history_returns_none_on_exception():
+    """Should return None on any exception."""
+    with patch("stotify.stock.yf.Ticker", side_effect=Exception("API error")):
+        result = get_history("AAPL")
+
+    assert result is None

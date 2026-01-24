@@ -116,3 +116,24 @@ class TestSendAlert:
 
         assert result is False
         mock_log.assert_called_once()
+
+    def test_send_alert_custom_message(self):
+        """Custom message should be used when provided."""
+        mock_response = Mock()
+        mock_response.raise_for_status = Mock()
+
+        with patch(
+            "stotify.notifier.requests.post", return_value=mock_response
+        ) as mock_post:
+            result = send_alert(
+                "AAPL",
+                255.50,
+                "ma_cross",
+                None,
+                "portfolio",
+                message="AAPL 50d MA above 200d MA",
+            )
+
+        assert result is True
+        call_args = mock_post.call_args
+        assert "[portfolio] AAPL 50d MA above 200d MA" in call_args[1]["data"]
