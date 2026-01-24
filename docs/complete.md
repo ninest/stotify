@@ -61,11 +61,13 @@ Tasks moved here once done.
 
 ### Notes
 
-- Runs every 15 min during market hours (9:30 AM - 4 PM ET)
+- Runs every 15 min during market hours (9:30 AM - 4 PM ET) via `Check Stock Alerts_15M`
 - Uses astral-sh/setup-uv@v7 for fast dependency installation
 - NTFY_PREFIX configurable via repository variable
 - Manual trigger available via workflow_dispatch
 - No remote configured - run `git remote add origin <url>` then `git push` to enable
+- `Check Stock Alerts_1D` runs after market close and skips the market-hours gate
+  so rolling averages can run even when markets are closed.
 
 ---
 

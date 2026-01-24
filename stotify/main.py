@@ -130,13 +130,22 @@ def check_alerts(
     timeframe_filter: str | None = None,
 ) -> int:
     """Process all alerts. Returns count of notifications sent."""
-    if not skip_market_check and not is_market_open():
-        print("Market is closed")
-        return 0
+    market_open = is_market_open()
+    if not skip_market_check and not market_open:
+        print("Market is closed; skipping non-1d alerts")
 
     sent = 0
     for group_name, alerts in config["groups"].items():
         for alert in alerts:
+            if not skip_market_check and not market_open and alert["timeframe"] != "1d":
+                print(
+                    "Skipping alert due to market hours: "
+                    f"group={group_name} "
+                    f"strategy={alert['strategy']} "
+                    f"timeframe={alert['timeframe']}"
+                )
+                continue
+
             if timeframe_filter and alert["timeframe"] != timeframe_filter:
                 print(
                     "Skipping alert due to timeframe mismatch: "

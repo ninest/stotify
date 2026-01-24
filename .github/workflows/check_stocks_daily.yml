@@ -1,4 +1,4 @@
-name: Check Stock Alerts (Daily)
+name: Check Stock Alerts_1D
 
 on:
   schedule:
@@ -29,7 +29,7 @@ jobs:
         run: uv pip install -e .
 
       - name: Run stock alerts (daily timeframe)
-        run: uv run python -m stotify.main alerts.json
+        run: uv run python -m stotify.main alerts.json --skip-market-check
         env:
           NTFY_PREFIX: ${{ vars.NTFY_PREFIX || 'stotify' }}
           STOTIFY_TIMEFRAME: 1d
