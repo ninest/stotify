@@ -176,16 +176,24 @@ def check_alerts(
                     message=signal.message,
                 ):
                     sent += 1
+                    details = (
+                        signal.message
+                        if signal.message
+                        else f"price=${signal.price:.2f} threshold={signal.threshold}"
+                    )
                     print(
                         "Notification sent: "
                         f"group={group_name} "
+                        f"timeframe={alert['timeframe']} "
                         f"ticker={signal.ticker} "
-                        f"strategy={alert['strategy']}"
+                        f"strategy={alert['strategy']} "
+                        f"details={details}"
                     )
                 else:
                     print(
                         "Notification failed: "
                         f"group={group_name} "
+                        f"timeframe={alert['timeframe']} "
                         f"ticker={signal.ticker} "
                         f"strategy={alert['strategy']}"
                     )
