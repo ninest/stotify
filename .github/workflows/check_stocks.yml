@@ -1,4 +1,4 @@
-name: Check Stock Alerts
+name: Check Stock Alerts_15M
 
 on:
   schedule:

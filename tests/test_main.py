@@ -435,6 +435,36 @@ class TestCheckAlerts:
         }
         assert check_alerts(config) == 0
 
+    def test_allows_daily_timeframe_when_market_closed(
+        self, mock_market_closed, mock_send_alert
+    ):
+        """Daily timeframe alerts should run even when market is closed."""
+        config = {
+            "groups": {
+                "portfolio": [
+                    {
+                        "ticker": "AAPL",
+                        "strategy": "threshold",
+                        "timeframe": "1d",
+                        "params": {"high": 250},
+                    }
+                ]
+            }
+        }
+
+        with mock_price(260.0):
+            sent = check_alerts(config)
+
+        assert sent == 1
+        mock_send_alert.assert_called_once_with(
+            "AAPL",
+            260.0,
+            "high",
+            250,
+            "portfolio",
+            message=None,
+        )
+
     def test_high_alert_fires_when_price_above_threshold(
         self, mock_market_open, mock_send_alert
     ):
