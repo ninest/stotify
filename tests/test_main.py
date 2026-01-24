@@ -34,7 +34,7 @@ def mock_send_alert():
 
 def mock_price(price):
     """Helper to mock get_price with a specific value."""
-    return patch("stotify.main.get_price", return_value=price)
+    return patch("stotify.strategies.get_price", return_value=price)
 
 
 def write_config(tmp_path, data):
@@ -51,7 +51,19 @@ class TestLoadConfig:
     def test_valid_config_with_groups(self, tmp_path):
         """Valid groups structure should load successfully."""
         config_file = write_config(
-            tmp_path, {"groups": {"portfolio": [{"ticker": "AAPL", "high": 250}]}}
+            tmp_path,
+            {
+                "groups": {
+                    "portfolio": [
+                        {
+                            "ticker": "AAPL",
+                            "strategy": "threshold",
+                            "timeframe": "15m",
+                            "params": {"high": 250},
+                        }
+                    ]
+                }
+            },
         )
         config = load_config(config_file)
         assert "groups" in config
@@ -64,8 +76,22 @@ class TestLoadConfig:
             tmp_path,
             {
                 "groups": {
-                    "portfolio": [{"ticker": "AAPL", "high": 250}],
-                    "tech-watch": [{"ticker": "GOOGL", "low": 320}],
+                    "portfolio": [
+                        {
+                            "ticker": "AAPL",
+                            "strategy": "threshold",
+                            "timeframe": "15m",
+                            "params": {"high": 250},
+                        }
+                    ],
+                    "tech-watch": [
+                        {
+                            "ticker": "GOOGL",
+                            "strategy": "threshold",
+                            "timeframe": "15m",
+                            "params": {"low": 320},
+                        }
+                    ],
                 }
             },
         )
@@ -89,7 +115,19 @@ class TestLoadConfig:
     def test_rejects_invalid_group_name_spaces(self, tmp_path):
         """Group names with spaces should error."""
         config_file = write_config(
-            tmp_path, {"groups": {"my portfolio": [{"ticker": "AAPL", "high": 250}]}}
+            tmp_path,
+            {
+                "groups": {
+                    "my portfolio": [
+                        {
+                            "ticker": "AAPL",
+                            "strategy": "threshold",
+                            "timeframe": "15m",
+                            "params": {"high": 250},
+                        }
+                    ]
+                }
+            },
         )
         with pytest.raises(
             ValueError, match="Group name 'my portfolio' contains invalid characters"
@@ -99,7 +137,19 @@ class TestLoadConfig:
     def test_rejects_invalid_group_name_special_chars(self, tmp_path):
         """Group names with special chars should error."""
         config_file = write_config(
-            tmp_path, {"groups": {"portfolio!": [{"ticker": "AAPL", "high": 250}]}}
+            tmp_path,
+            {
+                "groups": {
+                    "portfolio!": [
+                        {
+                            "ticker": "AAPL",
+                            "strategy": "threshold",
+                            "timeframe": "15m",
+                            "params": {"high": 250},
+                        }
+                    ]
+                }
+            },
         )
         with pytest.raises(
             ValueError, match="Group name 'portfolio!' contains invalid characters"
@@ -109,7 +159,19 @@ class TestLoadConfig:
     def test_accepts_valid_group_name_with_hyphens(self, tmp_path):
         """Group names with hyphens should be valid."""
         config_file = write_config(
-            tmp_path, {"groups": {"tech-watch": [{"ticker": "AAPL", "high": 250}]}}
+            tmp_path,
+            {
+                "groups": {
+                    "tech-watch": [
+                        {
+                            "ticker": "AAPL",
+                            "strategy": "threshold",
+                            "timeframe": "15m",
+                            "params": {"high": 250},
+                        }
+                    ]
+                }
+            },
         )
         config = load_config(config_file)
         assert "tech-watch" in config["groups"]
@@ -117,7 +179,19 @@ class TestLoadConfig:
     def test_accepts_valid_group_name_with_underscores(self, tmp_path):
         """Group names with underscores should be valid."""
         config_file = write_config(
-            tmp_path, {"groups": {"tech_watch": [{"ticker": "AAPL", "high": 250}]}}
+            tmp_path,
+            {
+                "groups": {
+                    "tech_watch": [
+                        {
+                            "ticker": "AAPL",
+                            "strategy": "threshold",
+                            "timeframe": "15m",
+                            "params": {"high": 250},
+                        }
+                    ]
+                }
+            },
         )
         config = load_config(config_file)
         assert "tech_watch" in config["groups"]
@@ -125,7 +199,19 @@ class TestLoadConfig:
     def test_rejects_empty_group_name(self, tmp_path):
         """Empty group name should error."""
         config_file = write_config(
-            tmp_path, {"groups": {"": [{"ticker": "AAPL", "high": 250}]}}
+            tmp_path,
+            {
+                "groups": {
+                    "": [
+                        {
+                            "ticker": "AAPL",
+                            "strategy": "threshold",
+                            "timeframe": "15m",
+                            "params": {"high": 250},
+                        }
+                    ]
+                }
+            },
         )
         with pytest.raises(ValueError, match="Group name cannot be empty"):
             load_config(config_file)
@@ -134,7 +220,19 @@ class TestLoadConfig:
         """Group names > 100 characters should error."""
         long_name = "a" * 101
         config_file = write_config(
-            tmp_path, {"groups": {long_name: [{"ticker": "AAPL", "high": 250}]}}
+            tmp_path,
+            {
+                "groups": {
+                    long_name: [
+                        {
+                            "ticker": "AAPL",
+                            "strategy": "threshold",
+                            "timeframe": "15m",
+                            "params": {"high": 250},
+                        }
+                    ]
+                }
+            },
         )
         with pytest.raises(ValueError, match="exceeds 100 characters"):
             load_config(config_file)
@@ -143,7 +241,19 @@ class TestLoadConfig:
         """Group names exactly 100 characters should be valid."""
         exact_name = "a" * 100
         config_file = write_config(
-            tmp_path, {"groups": {exact_name: [{"ticker": "AAPL", "high": 250}]}}
+            tmp_path,
+            {
+                "groups": {
+                    exact_name: [
+                        {
+                            "ticker": "AAPL",
+                            "strategy": "threshold",
+                            "timeframe": "15m",
+                            "params": {"high": 250},
+                        }
+                    ]
+                }
+            },
         )
         config = load_config(config_file)
         assert exact_name in config["groups"]
@@ -154,8 +264,22 @@ class TestLoadConfig:
             tmp_path,
             {
                 "groups": {
-                    "Portfolio": [{"ticker": "AAPL", "high": 250}],
-                    "portfolio": [{"ticker": "GOOGL", "high": 300}],
+                    "Portfolio": [
+                        {
+                            "ticker": "AAPL",
+                            "strategy": "threshold",
+                            "timeframe": "15m",
+                            "params": {"high": 250},
+                        }
+                    ],
+                    "portfolio": [
+                        {
+                            "ticker": "GOOGL",
+                            "strategy": "threshold",
+                            "timeframe": "15m",
+                            "params": {"high": 300},
+                        }
+                    ],
                 }
             },
         )
@@ -167,21 +291,44 @@ class TestLoadConfig:
     def test_rejects_missing_ticker_in_group(self, tmp_path):
         """Alerts missing ticker should error with group context."""
         config_file = write_config(
-            tmp_path, {"groups": {"portfolio": [{"high": 250}]}}
+            tmp_path,
+            {
+                "groups": {
+                    "portfolio": [
+                        {
+                            "strategy": "threshold",
+                            "timeframe": "15m",
+                            "params": {"high": 250},
+                        }
+                    ]
+                }
+            },
         )
         with pytest.raises(
-            ValueError, match="Alert in group 'portfolio' missing 'ticker'"
+            ValueError, match="Alert in group 'portfolio' missing 'ticker' or 'tickers'"
         ):
             load_config(config_file)
 
     def test_rejects_missing_threshold_in_group(self, tmp_path):
         """Alerts missing thresholds should error with group context."""
         config_file = write_config(
-            tmp_path, {"groups": {"portfolio": [{"ticker": "AAPL"}]}}
+            tmp_path,
+            {
+                "groups": {
+                    "portfolio": [
+                        {
+                            "ticker": "AAPL",
+                            "strategy": "threshold",
+                            "timeframe": "15m",
+                            "params": {},
+                        }
+                    ]
+                }
+            },
         )
         with pytest.raises(
             ValueError,
-            match="Alert for AAPL in group 'portfolio' must have 'high' or 'low'",
+            match="Alert for AAPL in group 'portfolio' must have 'high' or 'low' in params",
         ):
             load_config(config_file)
 
@@ -189,11 +336,83 @@ class TestLoadConfig:
         """Alerts with both high and low should be valid."""
         config_file = write_config(
             tmp_path,
-            {"groups": {"portfolio": [{"ticker": "AAPL", "high": 250, "low": 180}]}},
+            {
+                "groups": {
+                    "portfolio": [
+                        {
+                            "ticker": "AAPL",
+                            "strategy": "threshold",
+                            "timeframe": "15m",
+                            "params": {"high": 250, "low": 180},
+                        }
+                    ]
+                }
+            },
         )
         config = load_config(config_file)
-        assert config["groups"]["portfolio"][0]["high"] == 250
-        assert config["groups"]["portfolio"][0]["low"] == 180
+        assert config["groups"]["portfolio"][0]["params"]["high"] == 250
+        assert config["groups"]["portfolio"][0]["params"]["low"] == 180
+
+    def test_rejects_invalid_timeframe(self, tmp_path):
+        """Alerts with invalid timeframe should error."""
+        config_file = write_config(
+            tmp_path,
+            {
+                "groups": {
+                    "portfolio": [
+                        {
+                            "ticker": "AAPL",
+                            "strategy": "threshold",
+                            "timeframe": "15minutes",
+                            "params": {"high": 250},
+                        }
+                    ]
+                }
+            },
+        )
+        with pytest.raises(ValueError, match="invalid timeframe"):
+            load_config(config_file)
+
+    def test_rejects_unknown_strategy(self, tmp_path):
+        """Alerts with unknown strategy should error."""
+        config_file = write_config(
+            tmp_path,
+            {
+                "groups": {
+                    "portfolio": [
+                        {
+                            "ticker": "AAPL",
+                            "strategy": "unknown",
+                            "timeframe": "15m",
+                            "params": {"high": 250},
+                        }
+                    ]
+                }
+            },
+        )
+        with pytest.raises(ValueError, match="invalid strategy"):
+            load_config(config_file)
+
+    def test_rejects_both_ticker_and_tickers(self, tmp_path):
+        """Alerts with ticker and tickers should error."""
+        config_file = write_config(
+            tmp_path,
+            {
+                "groups": {
+                    "portfolio": [
+                        {
+                            "ticker": "AAPL",
+                            "tickers": ["AAPL", "MSFT"],
+                            "strategy": "threshold",
+                            "timeframe": "15m",
+                            "params": {"high": 250},
+                        }
+                    ]
+                }
+            },
+        )
+        with pytest.raises(ValueError, match="cannot define both 'ticker' and 'tickers'"):
+            load_config(config_file)
 
 
 # --- Alert Checking ---
@@ -202,36 +421,94 @@ class TestLoadConfig:
 class TestCheckAlerts:
     def test_skips_when_market_closed(self, mock_market_closed):
         """Should skip all checks when market is closed."""
-        config = {"groups": {"portfolio": [{"ticker": "AAPL", "high": 250}]}}
+        config = {
+            "groups": {
+                "portfolio": [
+                    {
+                        "ticker": "AAPL",
+                        "strategy": "threshold",
+                        "timeframe": "15m",
+                        "params": {"high": 250},
+                    }
+                ]
+            }
+        }
         assert check_alerts(config) == 0
 
     def test_high_alert_fires_when_price_above_threshold(
         self, mock_market_open, mock_send_alert
     ):
         """High alert should fire when price exceeds threshold."""
-        config = {"groups": {"portfolio": [{"ticker": "AAPL", "high": 250}]}}
+        config = {
+            "groups": {
+                "portfolio": [
+                    {
+                        "ticker": "AAPL",
+                        "strategy": "threshold",
+                        "timeframe": "15m",
+                        "params": {"high": 250},
+                    }
+                ]
+            }
+        }
 
         with mock_price(260.0):  # price > threshold
             sent = check_alerts(config)
 
         assert sent == 1
-        mock_send_alert.assert_called_once_with("AAPL", 260.0, "high", 250, "portfolio")
+        mock_send_alert.assert_called_once_with(
+            "AAPL",
+            260.0,
+            "high",
+            250,
+            "portfolio",
+            message=None,
+        )
 
     def test_low_alert_fires_when_price_below_threshold(
         self, mock_market_open, mock_send_alert
     ):
         """Low alert should fire when price falls below threshold."""
-        config = {"groups": {"portfolio": [{"ticker": "AAPL", "low": 180}]}}
+        config = {
+            "groups": {
+                "portfolio": [
+                    {
+                        "ticker": "AAPL",
+                        "strategy": "threshold",
+                        "timeframe": "15m",
+                        "params": {"low": 180},
+                    }
+                ]
+            }
+        }
 
         with mock_price(175.0):  # price < threshold
             sent = check_alerts(config)
 
         assert sent == 1
-        mock_send_alert.assert_called_once_with("AAPL", 175.0, "low", 180, "portfolio")
+        mock_send_alert.assert_called_once_with(
+            "AAPL",
+            175.0,
+            "low",
+            180,
+            "portfolio",
+            message=None,
+        )
 
     def test_no_alert_when_price_in_range(self, mock_market_open, mock_send_alert):
         """No alert should fire when price is between thresholds."""
-        config = {"groups": {"portfolio": [{"ticker": "AAPL", "high": 250, "low": 180}]}}
+        config = {
+            "groups": {
+                "portfolio": [
+                    {
+                        "ticker": "AAPL",
+                        "strategy": "threshold",
+                        "timeframe": "15m",
+                        "params": {"high": 250, "low": 180},
+                    }
+                ]
+            }
+        }
 
         with mock_price(200.0):  # 180 < price < 250
             sent = check_alerts(config)
@@ -243,7 +520,18 @@ class TestCheckAlerts:
         self, mock_market_open, mock_send_alert
     ):
         """Should skip alerts when price fetch fails."""
-        config = {"groups": {"portfolio": [{"ticker": "INVALID", "high": 100}]}}
+        config = {
+            "groups": {
+                "portfolio": [
+                    {
+                        "ticker": "INVALID",
+                        "strategy": "threshold",
+                        "timeframe": "15m",
+                        "params": {"high": 100},
+                    }
+                ]
+            }
+        }
 
         with mock_price(None):  # yfinance failed
             sent = check_alerts(config)
@@ -253,7 +541,18 @@ class TestCheckAlerts:
 
     def test_skip_market_check_flag_bypasses_hours(self, mock_market_closed):
         """skip_market_check=True should allow checks when market closed."""
-        config = {"groups": {"portfolio": [{"ticker": "AAPL", "high": 250}]}}
+        config = {
+            "groups": {
+                "portfolio": [
+                    {
+                        "ticker": "AAPL",
+                        "strategy": "threshold",
+                        "timeframe": "15m",
+                        "params": {"high": 250},
+                    }
+                ]
+            }
+        }
 
         with mock_price(260.0), patch("stotify.main.send_alert", return_value=True):
             sent = check_alerts(config, skip_market_check=True)
@@ -266,8 +565,22 @@ class TestCheckAlerts:
         """Alerts in different groups should pass correct group name."""
         config = {
             "groups": {
-                "portfolio": [{"ticker": "AAPL", "high": 250}],
-                "tech-watch": [{"ticker": "GOOGL", "low": 320}],
+                "portfolio": [
+                    {
+                        "ticker": "AAPL",
+                        "strategy": "threshold",
+                        "timeframe": "15m",
+                        "params": {"high": 250},
+                    }
+                ],
+                "tech-watch": [
+                    {
+                        "ticker": "GOOGL",
+                        "strategy": "threshold",
+                        "timeframe": "15m",
+                        "params": {"low": 320},
+                    }
+                ],
             }
         }
 
@@ -285,8 +598,18 @@ class TestCheckAlerts:
         config = {
             "groups": {
                 "portfolio": [
-                    {"ticker": "AAPL", "high": 250},
-                    {"ticker": "MSFT", "high": 400},
+                    {
+                        "ticker": "AAPL",
+                        "strategy": "threshold",
+                        "timeframe": "15m",
+                        "params": {"high": 250},
+                    },
+                    {
+                        "ticker": "MSFT",
+                        "strategy": "threshold",
+                        "timeframe": "15m",
+                        "params": {"high": 400},
+                    },
                 ]
             }
         }
@@ -299,12 +622,70 @@ class TestCheckAlerts:
         assert calls[0][0] == ("AAPL", 500.0, "high", 250, "portfolio")
         assert calls[1][0] == ("MSFT", 500.0, "high", 400, "portfolio")
 
+    def test_timeframe_filter_skips_non_matching(self, mock_market_open, mock_send_alert):
+        """Alerts with different timeframe should be skipped when filtered."""
+        config = {
+            "groups": {
+                "portfolio": [
+                    {
+                        "ticker": "AAPL",
+                        "strategy": "threshold",
+                        "timeframe": "15m",
+                        "params": {"high": 250},
+                    }
+                ]
+            }
+        }
+
+        with mock_price(260.0):
+            sent = check_alerts(config, timeframe_filter="1d")
+
+        assert sent == 0
+        mock_send_alert.assert_not_called()
+
+    def test_threshold_with_multiple_tickers(self, mock_market_open, mock_send_alert):
+        """Threshold strategy should evaluate multiple tickers."""
+        config = {
+            "groups": {
+                "portfolio": [
+                    {
+                        "tickers": ["AAPL", "MSFT"],
+                        "strategy": "threshold",
+                        "timeframe": "15m",
+                        "params": {"high": 250},
+                    }
+                ]
+            }
+        }
+
+        with mock_price(260.0):
+            sent = check_alerts(config)
+
+        assert sent == 2
+        calls = mock_send_alert.call_args_list
+        assert calls[0][0] == ("AAPL", 260.0, "high", 250, "portfolio")
+        assert calls[1][0] == ("MSFT", 260.0, "high", 250, "portfolio")
+
     def test_same_ticker_in_multiple_groups(self, mock_market_open, mock_send_alert):
         """Same ticker in different groups should trigger separate alerts."""
         config = {
             "groups": {
-                "portfolio": [{"ticker": "AAPL", "high": 250}],
-                "tech-watch": [{"ticker": "AAPL", "high": 250}],
+                "portfolio": [
+                    {
+                        "ticker": "AAPL",
+                        "strategy": "threshold",
+                        "timeframe": "15m",
+                        "params": {"high": 250},
+                    }
+                ],
+                "tech-watch": [
+                    {
+                        "ticker": "AAPL",
+                        "strategy": "threshold",
+                        "timeframe": "15m",
+                        "params": {"high": 250},
+                    }
+                ],
             }
         }
 
@@ -324,7 +705,19 @@ class TestMain:
     def test_returns_0_on_success(self, tmp_path):
         """Main should return 0 when config is valid and checks run."""
         config_file = write_config(
-            tmp_path, {"groups": {"portfolio": [{"ticker": "AAPL", "high": 250}]}}
+            tmp_path,
+            {
+                "groups": {
+                    "portfolio": [
+                        {
+                            "ticker": "AAPL",
+                            "strategy": "threshold",
+                            "timeframe": "15m",
+                            "params": {"high": 250},
+                        }
+                    ]
+                }
+            },
         )
 
         with patch("stotify.main.check_alerts", return_value=1):
@@ -340,3 +733,23 @@ class TestMain:
     def test_returns_1_on_missing_file(self):
         """Main should return 1 when config file doesn't exist."""
         assert main("/nonexistent/path.json") == 1
+
+    def test_returns_1_on_invalid_timeframe_filter(self, tmp_path):
+        """Main should return 1 when timeframe filter is invalid."""
+        config_file = write_config(
+            tmp_path,
+            {
+                "groups": {
+                    "portfolio": [
+                        {
+                            "ticker": "AAPL",
+                            "strategy": "threshold",
+                            "timeframe": "15m",
+                            "params": {"high": 250},
+                        }
+                    ]
+                }
+            },
+        )
+
+        assert main(str(config_file), timeframe_filter="15minutes") == 1

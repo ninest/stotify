@@ -1,0 +1,35 @@
+name: Check Stock Alerts (Daily)
+
+on:
+  schedule:
+    # Daily at 21:00 UTC (after US market close)
+    - cron: '0 21 * * 1-5'
+  workflow_dispatch:  # Manual trigger
+
+jobs:
+  check-stocks:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+
+      - name: Set up Python
+        run: uv python install 3.14
+
+      - name: Install dependencies
+        run: uv sync
+
+      - name: Install package
+        run: uv pip install -e .
+
+      - name: Run stock alerts (daily timeframe)
+        run: uv run python -m stotify.main alerts.json
+        env:
+          NTFY_PREFIX: ${{ vars.NTFY_PREFIX || 'stotify' }}
+          STOTIFY_TIMEFRAME: 1d

@@ -2,7 +2,7 @@
 
 ## Overview
 
-Stock price alert system that monitors configured tickers and sends ntfy.sh notifications when prices cross thresholds.
+Stock price alert system that monitors configured strategies and sends ntfy.sh notifications when conditions are met.
 
 ## Technical Stack
 
@@ -15,14 +15,13 @@ Stock price alert system that monitors configured tickers and sends ntfy.sh noti
 
 ## Specifications
 
-### Threshold Alerts
-- **High alert**: Triggered when current price >= threshold
-- **Low alert**: Triggered when current price <= threshold
-- Alerts fire every 15 minutes while condition remains true
+### Strategy Alerts
+- Strategies define when notifications are sent (e.g., threshold, moving average cross).
+- Alerts fire on the cadence configured in each alert's `timeframe` field.
 
 ### ntfy.sh Channels
-- Auto-generated per alert: `{prefix}-{ticker}-{H|L}{threshold}`
-- Examples: `stotify-AAPL-H250`, `stotify-AAPL-L180`
+- Auto-generated per group: `{prefix}-{group_name}`
+- Examples: `stotify-portfolio`, `stotify-tech-watch`
 - Prefix configurable via `NTFY_PREFIX` env var (default: "stotify")
 
 ### Trading Hours
@@ -33,10 +32,22 @@ Stock price alert system that monitors configured tickers and sends ntfy.sh noti
 ### Configuration (`alerts.json`)
 ```json
 {
-  "alerts": [
-    { "ticker": "AAPL", "high": 250, "low": 180 },
-    { "ticker": "GOOGL", "high": 200 }
-  ]
+  "groups": {
+    "portfolio": [
+      {
+        "ticker": "AAPL",
+        "strategy": "threshold",
+        "timeframe": "15m",
+        "params": { "high": 250, "low": 180 }
+      },
+      {
+        "tickers": ["AAPL", "MSFT"],
+        "strategy": "ma_cross",
+        "timeframe": "1d",
+        "params": { "fast_window": 50, "slow_window": 200 }
+      }
+    ]
+  }
 }
 ```
 
