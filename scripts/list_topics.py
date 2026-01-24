@@ -4,6 +4,7 @@
 import json
 from pathlib import Path
 
+from stotify.main import extract_tickers
 from stotify.notifier import get_channel
 
 ALERTS_FILE = Path(__file__).parent.parent / "alerts.json"
@@ -17,11 +18,17 @@ def main() -> None:
     for group_name, alerts in data["groups"].items():
         print(get_channel(group_name))
         for alert in alerts:
-            ticker = alert["ticker"]
-            if "high" in alert:
-                print(f"- {ticker} > {alert['high']}")
-            if "low" in alert:
-                print(f"- {ticker} < {alert['low']}")
+            tickers = ",".join(extract_tickers(alert, group_name))
+            strategy = alert.get("strategy", "unknown")
+            timeframe = alert.get("timeframe", "unspecified")
+            params = alert.get("params", {})
+            print(
+                "- "
+                f"tickers={tickers} "
+                f"strategy={strategy} "
+                f"timeframe={timeframe} "
+                f"params={params}"
+            )
         print()
 
 
