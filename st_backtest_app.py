@@ -85,7 +85,7 @@ if run_backtest:
         st.subheader("Price with Moving Averages")
         line_chart = (
             alt.Chart(melted)
-            .mark_line()
+            .mark_line(strokeWidth=2)
             .encode(
                 x=alt.X("Date:T", title="Date"),
                 y=alt.Y("Value:Q", title="Price"),
