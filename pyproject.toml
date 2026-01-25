@@ -5,14 +5,15 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [
+    "pandas>=2.3.2",
     "pytz>=2025.2",
     "requests>=2.32.5",
+    "streamlit>=1.50.0",
     "yfinance>=1.0",
 ]
 
 [dependency-groups]
 dev = [
-    "pandas>=2.3.2",
     "pytest>=9.0.2",
     "ruff>=0.14.13",
 ]
