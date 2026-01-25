@@ -1,6 +1,6 @@
 ST Backtest App
 ===============
 
-1. Open the Streamlit app (`st_backtest_app.py`).
-2. Enter a stock ticker and date range.
-3. Click **Run backtest** to see the results.
+1. Install dependencies: `uv sync`.
+2. Run the app: `uv run streamlit run st_backtest_app.py`.
+3. Enter a stock ticker and date range, then click **Run backtest**.
