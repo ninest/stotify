@@ -129,13 +129,16 @@ if run_backtest:
                     y=alt.Y("Price:Q", title="Price"),
                     color=alt.Color(
                         "Type:N",
-                        scale=alt.Scale(domain=["Entry", "Exit"], range=["#00c853", "#ff5252"]),
+                        scale=alt.Scale(domain=["Entry", "Exit"], range=["#ff0000", "#00ff00"]),
                         legend=alt.Legend(orient="bottom"),
                     ),
                     tooltip=["Type", "Date", "Price"],
                 )
             )
-            st.altair_chart(line_chart + marker_chart, use_container_width=True)
+            combined_chart = (line_chart + marker_chart).resolve_scale(
+                color="independent"
+            )
+            st.altair_chart(combined_chart, use_container_width=True)
         else:
             st.altair_chart(line_chart, use_container_width=True)
 
