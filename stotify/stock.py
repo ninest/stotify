@@ -17,11 +17,20 @@ def get_price(ticker: str) -> float | None:
         return None
 
 
-def get_history(ticker: str, period: str = "1y", interval: str = "1d"):
+def get_history(
+    ticker: str,
+    period: str = "1y",
+    interval: str = "1d",
+    start: str | None = None,
+    end: str | None = None,
+):
     """Fetch historical data for a ticker. Returns None on any error."""
     try:
         stock = yf.Ticker(ticker)
-        history = stock.history(period=period, interval=interval)
+        if start or end:
+            history = stock.history(start=start, end=end, interval=interval)
+        else:
+            history = stock.history(period=period, interval=interval)
         if history is None or history.empty:
             return None
         return history
