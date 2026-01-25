@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import datetime as dt
 
+import altair as alt
 import pandas as pd
 import streamlit as st
 
@@ -63,15 +64,63 @@ if run_backtest:
         st.warning("No historical data found for that input.")
     else:
         history = result.history.copy()
+        price_label = "Price"
+        fast_label = f"{fast_window}-day MA"
+        slow_label = f"{slow_window}-day MA"
+
         chart_data = history[["Close", "fast_ma", "slow_ma"]].rename(
             columns={
-                "Close": "Price",
-                "fast_ma": f"{fast_window}-day MA",
-                "slow_ma": f"{slow_window}-day MA",
+                "Close": price_label,
+                "fast_ma": fast_label,
+                "slow_ma": slow_label,
             }
         )
+        chart_data = chart_data.reset_index(names="Date")
+        melted = chart_data.melt(
+            id_vars="Date",
+            var_name="Series",
+            value_name="Value",
+        )
+
         st.subheader("Price with Moving Averages")
-        st.line_chart(chart_data)
+        line_chart = (
+            alt.Chart(melted)
+            .mark_line()
+            .encode(
+                x=alt.X("Date:T", title="Date"),
+                y=alt.Y("Value:Q", title="Price"),
+                color=alt.Color("Series:N", legend=alt.Legend(orient="bottom")),
+            )
+        )
+
+        entries = [
+            {"Date": trade.entry_date, "Price": trade.entry_price, "Type": "Entry"}
+            for trade in result.trades
+        ]
+        exits = [
+            {"Date": trade.exit_date, "Price": trade.exit_price, "Type": "Exit"}
+            for trade in result.trades
+        ]
+        markers = pd.DataFrame(entries + exits)
+
+        if not markers.empty:
+            marker_chart = (
+                alt.Chart(markers)
+                .mark_point(filled=True, size=80)
+                .encode(
+                    x=alt.X("Date:T", title="Date"),
+                    y=alt.Y("Price:Q", title="Price"),
+                    color=alt.Color(
+                        "Type:N",
+                        scale=alt.Scale(domain=["Entry", "Exit"], range=["#2ca02c", "#d62728"]),
+                        legend=alt.Legend(orient="bottom"),
+                    ),
+                    tooltip=["Type", "Date", "Price"],
+                )
+            )
+            st.altair_chart(line_chart + marker_chart, use_container_width=True)
+        else:
+            st.altair_chart(line_chart, use_container_width=True)
 
         st.subheader("Backtest Summary")
         metrics = result.metrics
