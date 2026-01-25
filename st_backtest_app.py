@@ -68,28 +68,45 @@ if run_backtest:
         fast_label = f"{fast_window}-day MA"
         slow_label = f"{slow_window}-day MA"
 
-        chart_data = history[["Close", "fast_ma", "slow_ma"]].rename(
-            columns={
-                "Close": price_label,
-                "fast_ma": fast_label,
-                "slow_ma": slow_label,
-            }
+        price_series = (
+            history[["Close"]]
+            .rename(columns={"Close": "Value"})
+            .dropna()
+            .reset_index(names="Date")
         )
-        chart_data = chart_data.reset_index(names="Date")
-        melted = chart_data.melt(
-            id_vars="Date",
-            var_name="Series",
-            value_name="Value",
+        price_series["Series"] = price_label
+        fast_series = (
+            history[["fast_ma"]]
+            .rename(columns={"fast_ma": "Value"})
+            .dropna()
+            .reset_index(names="Date")
         )
+        fast_series["Series"] = fast_label
+        slow_series = (
+            history[["slow_ma"]]
+            .rename(columns={"slow_ma": "Value"})
+            .dropna()
+            .reset_index(names="Date")
+        )
+        slow_series["Series"] = slow_label
+
+        series_data = pd.concat([price_series, fast_series, slow_series], ignore_index=True)
 
         st.subheader("Price with Moving Averages")
         line_chart = (
-            alt.Chart(melted)
+            alt.Chart(series_data)
             .mark_line(strokeWidth=2)
             .encode(
                 x=alt.X("Date:T", title="Date"),
                 y=alt.Y("Value:Q", title="Price"),
-                color=alt.Color("Series:N", legend=alt.Legend(orient="bottom")),
+                color=alt.Color(
+                    "Series:N",
+                    legend=alt.Legend(orient="bottom"),
+                    scale=alt.Scale(
+                        domain=[price_label, fast_label, slow_label],
+                        range=["#1f77b4", "#ff7f0e", "#9467bd"],
+                    ),
+                ),
             )
         )
 
