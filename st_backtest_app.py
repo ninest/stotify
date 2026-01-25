@@ -129,7 +129,7 @@ if run_backtest:
                     y=alt.Y("Price:Q", title="Price"),
                     color=alt.Color(
                         "Type:N",
-                        scale=alt.Scale(domain=["Entry", "Exit"], range=["#2ca02c", "#d62728"]),
+                        scale=alt.Scale(domain=["Entry", "Exit"], range=["#00c853", "#ff5252"]),
                         legend=alt.Legend(orient="bottom"),
                     ),
                     tooltip=["Type", "Date", "Price"],
