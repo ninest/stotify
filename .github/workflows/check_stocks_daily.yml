@@ -1,10 +1,10 @@
 name: Check Stock Alerts_1D
 
-on:
-  schedule:
-    # Daily at 21:00 UTC (after US market close)
-    - cron: '0 21 * * 1-5'
-  workflow_dispatch:  # Manual trigger
+# on:
+#   schedule:
+#     # Daily at 21:00 UTC (after US market close)
+#     - cron: '0 21 * * 1-5'
+#   workflow_dispatch:  # Manual trigger
 
 jobs:
   check-stocks:
